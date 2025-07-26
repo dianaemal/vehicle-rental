@@ -13,6 +13,14 @@
         die("Query failed: " . mysqli_error($connection));
     }
 
+    // Fetch notifications for the logged-in user
+    $user_id = $_SESSION['user_id'];
+    $notification_query = "SELECT * FROM notifications WHERE user_id = $user_id ORDER BY created_at DESC";
+    $notification_result = mysqli_query($connection, $notification_query);
+    if (!$notification_result) {
+        die("Error fetching notifications: " . mysqli_error($connection));
+    }   
+    
 
 ?>
 <!DOCTYPE html>
@@ -22,14 +30,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Dashboard</title>   
     <link rel="stylesheet" href="../css/style.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
 </head>
 <body>
     <header>
         <h1>Customer Dashboard</h1>
+        
+
         <div>
             
             <a href='all_listings.php'>View Your bookings</a>
             <a href='../logout.php' onclick="return confirm('Are you sure you want to logout?')">🔒 Logout</a>
+            <<!-- Add Bootstrap Icons (in <head>) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="dropdown" style="display: inline-block; position: relative;">
+  <button class="btn btn-light position-relative dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell"></i>
+    <?php if (mysqli_num_rows($notification_result) > 0): ?>
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        <?php echo mysqli_num_rows($notification_result); ?>
+      </span>
+    <?php endif; ?>
+  </button>
+
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1" style="width: 300px; max-height: 300px; overflow-y: auto;">
+    <?php if (mysqli_num_rows($notification_result) > 0): ?>
+      <?php while ($notification = mysqli_fetch_assoc($notification_result)): ?>
+        <li>
+          <div class="dropdown-item text-wrap small">
+          <span class="me-2 rounded-circle bg-primary" style="width: 8px; height: 8px; display: inline-block;"></span>
+            <?php echo htmlspecialchars($notification['message']); ?>
+            <div class="text-muted small"><?php echo date("M d, Y H:i", strtotime($notification['created_at'])); ?></div>
+          </div>
+        </li>
+      <?php endwhile; ?>
+    <?php else: ?>
+      <li><div class="dropdown-item text-muted">No notifications</div></li>
+    <?php endif; ?>
+  </ul>
+</div>
+
+    
+  
+  </ul>
+</div>
 
         </div>
     </header>
