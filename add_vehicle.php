@@ -10,11 +10,21 @@
     }
    
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company'])
-    && isset($_POST['model']) && isset($_POST['passengers']) && isset($_POST['category'])
-    && isset($_POST['price_per_day']) && isset($_FILES['image'])) 
+    && isset($_POST['model']) && !empty($_POST['passengers']) && !empty($_POST['category'])
+    && isset($_POST['price_per_day']) && isset($_FILES['image']) && !empty($_POST['city']) && !empty($_POST['address']))
     
     {
      
+        $city = $_POST['city'];
+        $address = $_POST['address'];
+        // Insert the location into the database
+        $location_query = "INSERT INTO location (city, address) VALUES ('$city', '$address')";
+        if (mysqli_query($connection, $location_query)) {
+            $location_id = mysqli_insert_id($connection); // Get the last inserted location ID
+        } else {
+            die("Error inserting location: " . mysqli_error($connection));
+        }
+        $location = $location_id ? $location_id : null; // Use the location ID or null if not set
         $company = $_POST['company'];
         $model = $_POST['model'];
         $year = $_POST['year'] ? $_POST['year'] : null;
@@ -38,10 +48,11 @@
             // Move the uploaded file to the target directory
             if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                 // Insert vehicle data into the database
-                $query = "INSERT INTO vehicle (added_by, company, model, year, passengers, description, category, price_per_day, image)
-                          VALUES ('$added_by', '$company', '$model', '$year', '$passengers', '$description', '$category', '$price_per_day', '$target_file')";
+                $query = "INSERT INTO vehicle (added_by, location_id, company, model, year, passengers, description, category, price_per_day, image)
+                          VALUES ('$added_by', '$location_id', '$company', '$model', '$year', '$passengers', '$description', '$category', '$price_per_day', '$target_file')";
                 if (mysqli_query($connection, $query)) {
                     echo "Vehicle added successfully.";
+                    //header("location: views/all_listings.php")
                 } else {
                     echo "Error: " . mysqli_error($connection);
                 }

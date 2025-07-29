@@ -1,0 +1,147 @@
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f6fa;
+    color: #2f3640;
+    padding: 20px;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #0b318a;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+header a {
+    color: white;
+    text-decoration: underline;
+    margin-left: 15px;
+    font-weight: bold;
+
+}
+header a:hover {
+    color: #fbc531;
+    text-decoration: none;
+}
+
+
+.stats {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    gap: 40px;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.stat-box h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #718093;
+}
+
+.stat-box p {
+    font-size: 24px;
+    margin-top: 5px;
+    color: #44bd32;
+}
+
+.card-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.booking-card {
+    width: 330px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+}
+
+.booking-card:hover {
+    transform: translateY(-5px);
+}
+
+.booking-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.booking-info {
+    font-size: 14px;
+    margin-bottom: 6px;
+    
+    
+}
+
+h3.section-title {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    color: #0b318a;
+}
+
+.no-data {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    color: #999;
+}
+.dropdown {
+    position: relative;
+    margin-left: auto;
+}
+h4{
+    text-decoration: underline;
+}
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.button-container a {
+  
+    
+    border-radius: 5px;
+    
+}
+.approve-button a {
+    color: #44bd32;
+   
+   
+   
+}
+.reject-button a {
+    color: #e84118;
+}
+.reject-button a:hover {
+    color: #c23616;
+    text-decoration: none;
+}
+.approve-button a:hover {
+    color: #1c6d0f;
+    text-decoration: none;
+}
+

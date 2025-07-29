@@ -12,13 +12,16 @@
         die("Vehicle ID is required.");
     }
   
-    $query = "SELECT * FROM vehicle WHERE id = $vehicle_id";
+    $query = "SELECT v.id,
+         l.id AS location_id,
+         v.image
+    FROM vehicle v JOIN location l ON v.location_id = l.id WHERE v.id = $vehicle_id";
     $result = mysqli_query($connection, $query);
     $vehicle = mysqli_fetch_assoc($result);
  
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company'])
     && isset($_POST['model']) && isset($_POST['passengers']) && isset($_POST['category'])
-    && isset($_POST['price_per_day']))
+    && isset($_POST['price_per_day'])  && !empty($_POST['city']) && !empty($_POST['address']))
     
     {
        
@@ -30,6 +33,8 @@
         $description = $_POST['description'] ? $_POST['description'] : null;
         $category = $_POST['category'];
         $price_per_day = $_POST['price_per_day'];
+        $city = $_POST['city'];
+        $address = $_POST['address'];
         $original_image = $vehicle['image'];
 
         // Handle file upload
@@ -67,6 +72,11 @@
             echo "No image uploaded or upload error.";
         }
         // Update vehicle data in the database
+        $location_id = $vehicle['location_id'];
+        $location_query = "UPDATE location SET city='$city', address='$address' WHERE id=$location_id";
+        if (!mysqli_query($connection, $location_query)) {
+            die("Error updating location: " . mysqli_error($connection));
+        }
         $query = "UPDATE vehicle SET company='$company', model='$model', year='$year', passengers='$passengers', description='$description', category='$category', price_per_day='$price_per_day', image='$original_image' WHERE id=$vehicle_id";
         if (mysqli_query($connection, $query)) {
             header("Location: views/all_listings.php");

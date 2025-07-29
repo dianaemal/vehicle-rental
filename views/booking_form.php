@@ -10,7 +10,12 @@
     if (!$vehicle_id) {
         die("Vehicle ID is required.");
     }
-    $query = "SELECT * FROM vehicle WHERE id = $vehicle_id";
+    $query = "SELECT 
+       *
+    FROM vehicle v
+    JOIN location l ON v.location_id = l.id
+    WHERE v.id = $vehicle_id
+    ORDER BY v.created_at DESC";
     $result = mysqli_query($connection, $query);
     if (!$result) {
         die("Error fetching vehicle details: " . mysqli_error($connection));
@@ -73,154 +78,89 @@
 <head>
     <meta charset="UTF-8">
     <title>Booking Form</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
      <!-- Flatpickr JS -->
      <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-        }
-        header div {
-            margin-top: 10px;
-        }
-        header a {
-            color: white;
-            text-decoration: none;
-            margin-right: 15px;
-        }
-        img {
-            display: block;
-            margin: 20px auto;
-        }
-        form {
-            max-width: 600px;
-            margin: auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        form label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        form input[type="date"],
-        form input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-        }
-        form button {
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        form button:hover {
-            background-color: #218838;
-        }
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-        }
-        footer p {
-            margin: 0;
-        }
-        h2, h3 {
-            text-align: center;
-        }
-        .host-info {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: white;
-            padding: 20px;  
-            border-radius: 5px;
-        }
-        .host-info p {
-            margin: 5px 0;
-        }
-        .flatpickr-day.disabled {
-            position: relative;
-            color: #ccc !important;
-            cursor: not-allowed;
-        }
-
-        .flatpickr-day.disabled::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 15%;
-            width: 70%;
-            height: 2px;
-            background-color: red;
-            transform: rotate(-20deg);
-            pointer-events: none;
-        }
-    </style>
+     <link rel="stylesheet" href="../css/booking.css">
+     
+     
+    
+        
     
 </head>
 <body>
     <header>
-        <h1>Enter the information for your bookings:</h1>
+        <h2>Enter the information for your bookings:</h2>
         <div>
             <a href='customer-dashboard.php'>Go back to dashboard</a>
-            <a href='views/logout.php' onclick="return confirm('Are you sure you want to logout?')">🔒 Logout</a>
+            <a href='views/logout.php' onclick="return confirm('Are you sure you want to logout?')"> Logout</a>
         </div>
     </header>
-    <img src="../<?php echo $vehicle['image']; ?>" alt="Vehicle Image" width="600" height="400">
-    <h2><?php echo htmlspecialchars($vehicle['company']) . ' ' . htmlspecialchars($vehicle['model']); ?></h2>
-    <p>Year: <?php echo htmlspecialchars($vehicle['year']); ?></p>
-    <p>Passengers: <?php echo htmlspecialchars($vehicle['passengers']); ?></p>
-    <p>Category: <?php echo htmlspecialchars($vehicle['category']); ?></p>
-    <p>Description: <?php echo htmlspecialchars($vehicle['description']); ?></p>
-    <p>Price per day: $<?php echo htmlspecialchars($vehicle['price_per_day']); ?></p>
-    <div>
-        <h3>Host Information</h3>
-        <p><strong>Name:</strong> <?php echo htmlspecialchars($host_name); ?></p>
-        <p><strong>Email:</strong> <?php echo htmlspecialchars($host_email); ?></p>
-        <p><strong>Total Rented Cars:</strong> <?php echo $total_rented; ?></p>
+    <div class="image-div">
+    <img src="../<?php echo $vehicle['image']; ?>" alt="Vehicle Image" class="image">
+    <div class="overlay"></div>
+    <div class="text">
+        <h2><?php echo htmlspecialchars($vehicle['company']) . ' ' . htmlspecialchars($vehicle['model']); ?></h2>
+        <p>Year: <?php echo htmlspecialchars($vehicle['year']); ?></p>
+        <p>Passengers: <?php echo htmlspecialchars($vehicle['passengers']); ?></p>
+        <p>Category: <?php echo htmlspecialchars($vehicle['category']); ?></p>
+       
+        <p>Price per day: $<?php echo htmlspecialchars($vehicle['price_per_day']); ?></p>
     </div>
-    <h3>Booking Form</h3>
-    <form action="../process_booking.php?id=<?php echo $vehicle_id; ?>" method="post">
-        <label for="start_date">From:</label>
-        <input type="text" id="start_date" name="start_date" placeholder="Select a date" required>
-        <label for="end_date">To:</label>
-        <input type="text" id="end_date" name="end_date" placeholder="Select a date" required>
-        <label for="pickup_location">Pickup Location:</label>
-        <input type="text" id="pickup_location" name="pickup_location" required>    
-        <label for="dropoff_location">Dropoff Location:</label>
-        <input type="text" id="dropoff_location" name="dropoff_location" required>
-        <input type="hidden" name="vehicle_id" value="<?php echo $vehicle_id; ?>">
-        <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
-        <input type="hidden" id="total_price_input" name="total_price" value="0.00">
-     
+    </div>
+  
+    <div class="main-container">
+        <div class="left">
+
+            <?php if ($vehicle['description']): ?>
+            <div class="vehicle-description">
+                <h2>Description</h2>
+                <p><?php echo $vehicle['description']; ?></p>
+            </div>
+            <?php endif;?>
+
+            <!-- Host Info Section -->
+            <div class="host">
+            <h2 style="margin-bottom: 40px;">Host Information</h2>
+            <div class="host-info">
+                <img src="../images/profile.png" alt="Profile Image" class="profile">
+                <div class="host-details">
+                    <p><strong>Name:</strong> <?php echo htmlspecialchars($host_name); ?></p>
+                    <p><strong>Email:</strong> <?php echo htmlspecialchars($host_email); ?></p>
+                    <p><strong>Total Rented Cars:</strong> <?php echo $total_rented; ?></p>
+                </div>
+            </div>
+            </div>
+        </div>
        
 
+    <div class="right">
+        <h2>Booking Form</h2>
+        <form action="../process_booking.php?id=<?php echo $vehicle_id; ?>" method="post" class="booking-form">
+              
+            <label for="start_date">From:</label>
+            <input type="text" id="start_date" name="start_date" placeholder="Select a date" required>
+            <label for="end_date">To:</label>
+            <input type="text" id="end_date" name="end_date" placeholder="Select a date" required>
+            <input type="hidden" name="vehicle_id" value="<?php echo $vehicle_id; ?>">
+            <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+            <div class="pickup-info"> 
+                <label> Pickup/Dropoff Location:</label>
+                <P> <?php echo htmlspecialchars($vehicle['address']) . ', ' . htmlspecialchars($vehicle['city']) . ', BC' ?></P>
+            </div>
+            <input type="hidden" id="total_price_input" name="total_price" value="0.00"> 
+            <script>
+                const bookedRanges = <?php echo json_encode($dates); ?>;
+            </script>
         
-        <button type="submit">Book Now</button>
-    </form>
-    <script>
-        const bookedRanges = <?php echo json_encode($dates); ?>;
-    </script>
-  
-    <span> Total Price: $<span id="total_price">0.00</span></span>
-   
+            <label> Total Price:</label>
+            <div> $<span id="total_price">0.00</span></div>
+            <button type="submit">Book Now</button>
+        </form>
+       
+    </div>
+    </div>
     <script>
         const pricePerDay = <?php echo $vehicle['price_per_day']; ?>;
     </script>
