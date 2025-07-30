@@ -4,6 +4,10 @@
         header("Location: login-form.php");
         exit();
     }
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Customer') {
+        echo `You aren't aithorized to see the content of this page.`;
+        exit();
+   }
     require_once '../config/connection.php';
     $user_id = $_SESSION['user_id'];
     $vehicle_id = isset($_GET['id']) ? intval($_GET['id']) : null;
@@ -47,7 +51,7 @@
 
 
     // Query for booking info:
-    $booking_query = "SELECT * FROM booking WHERE vehicle_id = $vehicle_id";
+    $booking_query = "SELECT * FROM booking WHERE vehicle_id = $vehicle_id AND status != 'Cancelled'";
     $booking_result = mysqli_query($connection, $booking_query);
    if (!$booking_result) {
       die("Error fetching booking details: " . mysqli_error($connection));
@@ -56,18 +60,15 @@
     $dates = [];
     if (mysqli_num_rows($booking_result) > 0) {
         while ($row = mysqli_fetch_assoc($booking_result)) {
-            $dates[] = ['from' => $row['start_date'], 'to' => $row['end_date']];
-            // Assuming you want to store both start and end dates for disabling in the date picker
-            // If you only need start dates, you can change this to:
-            // $start_dates[] = $row['start_date'];
-            // If you need to store end dates as well, you can do:
+            // Ensure dates are valid before adding to array
+            if (!empty($row['start_date']) && !empty($row['end_date'])) {
+                $dates[] = ['from' => $row['start_date'], 'to' => $row['end_date']];
+            }
         }
     } else {
         $dates = []; // No bookings found
     }
-   //while ($row = mysqli_fetch_assoc($booking_result)) {
-     //  $start_dates[] = $row['start_date'];
-  // }
+   
 
 
 
@@ -79,22 +80,22 @@
     <meta charset="UTF-8">
     <title>Booking Form</title>
     <link rel="stylesheet" href="../css/dashboard.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-     <!-- Flatpickr JS -->
-     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
      <link rel="stylesheet" href="../css/booking.css">
-     
-     
-    
+     <style>
+        .right{
+            height: 500px;
+            max-height: 500px;
+        }
         
-    
+    </style>
+         
 </head>
 <body>
     <header>
         <h2>Enter the information for your bookings:</h2>
         <div>
             <a href='customer-dashboard.php'>Go back to dashboard</a>
-            <a href='views/logout.php' onclick="return confirm('Are you sure you want to logout?')"> Logout</a>
+            <a href='../logout.php' onclick="return confirm('Are you sure you want to logout?')"> Logout</a>
         </div>
     </header>
     <div class="image-div">
@@ -152,6 +153,7 @@
             <input type="hidden" id="total_price_input" name="total_price" value="0.00"> 
             <script>
                 const bookedRanges = <?php echo json_encode($dates); ?>;
+                const pricePerDay = <?php echo $vehicle['price_per_day']; ?>;
             </script>
         
             <label> Total Price:</label>
@@ -161,14 +163,14 @@
        
     </div>
     </div>
-    <script>
-        const pricePerDay = <?php echo $vehicle['price_per_day']; ?>;
-    </script>
+    
+   
+    <?php include "../includes/footer.php";?>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="path/to/your/custom-datepicker.js" defer></script>
     <script src="../js/datePicker.js"></script>
-    <footer>
-        <p>&copy; 2023 Vehicle Rental Service</p>
-    </footer>
 </body>
+
 </html>
-<?php
-// Close the database connection
+

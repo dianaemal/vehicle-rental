@@ -6,6 +6,10 @@
         header("Location: views/login-form.php");
         exit();
     }
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+        echo "<h3>You aren't authorized to see the content of this page.</h3>";
+        exit();
+    }
     require_once 'config/connection.php';
     $vehicle_id = $_GET['id'] ?? null;
     if (!$vehicle_id) {
@@ -68,16 +72,32 @@
             } else {
                 echo "Error uploading image.";
             }
-        } else {
-            echo "No image uploaded or upload error.";
-        }
+        } 
         // Update vehicle data in the database
         $location_id = $vehicle['location_id'];
         $location_query = "UPDATE location SET city='$city', address='$address' WHERE id=$location_id";
         if (!mysqli_query($connection, $location_query)) {
             die("Error updating location: " . mysqli_error($connection));
         }
-        $query = "UPDATE vehicle SET company='$company', model='$model', year='$year', passengers='$passengers', description='$description', category='$category', price_per_day='$price_per_day', image='$original_image' WHERE id=$vehicle_id";
+        //$query = "UPDATE vehicle SET company='$company', model='$model', year='$year', passengers='$passengers', description='$description', category='$category', price_per_day='$price_per_day', image='$original_image' WHERE id=$vehicle_id";
+        $query = "UPDATE vehicle SET company=?, model=?, year=?, passengers=?, description=?, category=?, price_per_day=?, image=? WHERE id=?";
+        $stmt = mysqli_prepare($connection, $query);
+
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "sssissssi", 
+                $company, $model, $year, $passengers, $description, $category, $price_per_day, $original_image, $vehicle_id);
+
+            if (mysqli_stmt_execute($stmt)) {
+                header("Location: views/all_listings.php");
+                exit();
+            } else {
+                echo "Execute failed: " . mysqli_stmt_error($stmt);
+            }
+
+            mysqli_stmt_close($stmt);
+        } else {
+            echo "Prepare failed: " . mysqli_error($connection);
+        }
         if (mysqli_query($connection, $query)) {
             header("Location: views/all_listings.php");
             exit();

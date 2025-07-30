@@ -1,0 +1,37 @@
+.receipt {
+    background-color: white;
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.receipt p {
+    margin: 0.5rem 0;
+}
+
+
+ ul {
+    padding-left: 1.2rem;
+}
+
+ li {
+    margin-bottom: 0.5rem;
+}
+
+button {
+    display: block;
+    margin: 1.5rem auto 0;
+    padding: 0.6rem 1.5rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}

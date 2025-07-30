@@ -8,7 +8,6 @@
         echo "<h3>You aren't authorized to see the content of this page.</h3>";
         exit();
     }
-    
     require_once 'config/connection.php';
     if (isset($_GET['id'])) {
         $booking_id = intval($_GET['id']);
@@ -23,10 +22,10 @@
             die("Booking not found.");
         }
         $user_id = $row['user_id'];
-        $query = "UPDATE booking SET status = 'Confirmed' WHERE id = $booking_id";
+        $query = "UPDATE booking SET status = 'Cancelled' WHERE id = $booking_id";
         if (mysqli_query($connection, $query)) {
             // set up notification message:
-            $notification_message = "Your booking for " . htmlspecialchars($row['company']) . " " . htmlspecialchars($row['model']) . " has been approved.";
+            $notification_message = "Your booking for " . htmlspecialchars($row['company']) . " " . htmlspecialchars($row['model']) . " has been rejected by the host.";
             // insert notification into the database:
             $notification_query = "INSERT INTO notifications (user_id, message) VALUES ($user_id, '$notification_message')";
             if (!mysqli_query($connection, $notification_query)) {

@@ -17,7 +17,7 @@ form{
 .form-div label {
 
     
-    font-size: 14px;
+    font-size: 16px;
     color: #333;
     
 }
@@ -32,7 +32,7 @@ form{
 input, select, button, textarea{
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 16px;
   
    
 }

@@ -6,6 +6,10 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== 1) {
     header("Location: views/login-form.php");
     exit();
 }
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    echo "<h3>You aren't authorized to see the content of this page.</h3>";
+    exit();
+}
 
 require_once 'config/connection.php';
 

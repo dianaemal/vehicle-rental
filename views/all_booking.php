@@ -35,6 +35,10 @@
 
 
     $result = mysqli_query($connection, $query);
+    $bookings = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $bookings[] = $row;
+    }
 
     $today = date('Y-m-d');
 ?>
@@ -115,6 +119,21 @@
     font-weight: bold;
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
+.footer{
+        
+        margin-top: 0; /* take available whitespace */
+        padding: 5px;
+        margin-bottom: -10px;      /* remove bottom whitespace */
+        padding-bottom: 5px;
+        height: 30px;            /* calc height when limited content */
+        background-color: #0b318a;
+        color: white;
+        text-align: center
+       
+    
+    }
+
+
 
     </style>
 </head>
@@ -124,40 +143,80 @@
         <div>
             
             <a href='customer-dashboard.php'>   Back to dashboard </a>
-            <a href='../logout.php'> Logout</a>
+            <a href='../logout.php' onClick ="return confirm('Are you sure you want to logout?')"> Logout</a>
            
         </div>
     </header>
     <div class="container">
-    <?php while ($row = mysqli_fetch_assoc($result)): ?>
-    <?php if ($row['start_date'] >= $today): ?>
+    <h2>Upcoming Bookings</h2>
+    
+   
         <?php
-            $date1 = new DateTime();
-            $date2 = new DateTime($row['start_date']);
-            $diff = $date1->diff($date2)->days;
+        $flag = false;
+        foreach ($bookings as $row): 
+            if ($row['start_date'] >= $today && $row['status'] != 'Cancelled'): 
+                $flag = true;
+                $date1 = new DateTime();
+                $date2 = new DateTime($row['start_date']);
+                $diff = $date1->diff($date2)->days;
 
         ?>
+            <div class="card">
+            <div class="image-container">
+            <img src="../<?php echo $row['image']; ?>" alt="Vehicle Image" width="200" >
+            <div class="days-left"><?php echo $diff; ?> days left</div>
+            </div>
+                <div class="info">
+                    <h3><?php echo $row['company'] . ' ' . $row['model']; ?></h3>
+                    <p>From: <?php echo $row['start_date'] . ' 10:00 AM'; ?> | To: <?php echo $row['end_date'] . ' 9:00 AM'; ?></p>
+                    <p>Hosted By: <?php echo $row['user_name']; ?> | Status: <?php echo $row['status']; ?></p>
+                    <p> Pickup/dropoff location: <?php echo ($row['address']) . ', ' . ($row['city']) . ', BC' ?></P>
+                    <?php if ($row['status'] == "Pending"):?>
+                    <a href="edit_booking_form.php?id=<?php echo $row['booking_id'] ?>"  class='btn'> Change dates</a>
+                    <?php endif; ?>
+                    <a href="../cancel_booking.php?id=<?php echo $row['booking_id'] ?>" onclick="return confirm('Any Cancellation made less than 24 hours before pick-up will not be refunded. Are you sure you want to cancel?' )"   class='btn' > Cancel booking </a>
+                    <a href="receipt.php?id=<?php echo $row['booking_id']; ?>" class="btn">View Receipt</a>
+
+                </div>
+            </div>
+        <?php endif; ?>
+        <?php endforeach; ?>
+        <?php if (!$flag):?>
+            <p class="no-data">No upcomming bookings available.</p>
+        <?php endif; ?>
+    
+ 
+    <h2>Past/Cancelled Bookings</h2>
+    <?php 
+    $flag2 = false;
+    foreach ($bookings as $row): 
+     if ($row['start_date'] < $today || $row['status'] == 'Cancelled'):
+        $flag2 = true;
+     
+     ?>
         <div class="card">
         <div class="image-container">
         <img src="../<?php echo $row['image']; ?>" alt="Vehicle Image" width="200" >
-        <div class="days-left"><?php echo $diff; ?> days left</div>
-    </div>
+       
+        </div>
             <div class="info">
                 <h3><?php echo $row['company'] . ' ' . $row['model']; ?></h3>
                 <p>From: <?php echo $row['start_date'] . ' 10:00 AM'; ?> | To: <?php echo $row['end_date'] . ' 9:00 AM'; ?></p>
                 <p>Hosted By: <?php echo $row['user_name']; ?> | Status: <?php echo $row['status']; ?></p>
                 <p> Pickup/dropoff location: <?php echo ($row['address']) . ', ' . ($row['city']) . ', BC' ?></P>
-                <?php if ($row['status'] == "Pending"):?>
-                <a href="" > Change dates</a>
-                <?php endif; ?>
-                <a href="" > Cancel booking </a>
                 <a href="receipt.php?id=<?php echo $row['booking_id']; ?>" class="btn">View Receipt</a>
 
             </div>
         </div>
-    <?php endif; ?>
-<?php endwhile; ?>
+        <?php endif; ?>
+    <?php endforeach; ?>
+    <?php if (!$flag2):?>
+            <p class="no-data">No past bookings available.</p>
+        <?php endif; ?>
+                
     </div>
+    <?php include "../includes/footer.php";?>
+    
 </body>
 </html>
 

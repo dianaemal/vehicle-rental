@@ -1,5 +1,5 @@
 <?php
-// Check if the user is an admin
+
   
     require_once 'config/connection.php';
  
@@ -8,6 +8,11 @@
         header("Location: views/login-form.php");
         exit();
     }
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+        echo "<h3>You aren't authorized to see the content of this page.</h3>";
+        exit();
+    }
+    
    
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company'])
     && isset($_POST['model']) && !empty($_POST['passengers']) && !empty($_POST['category'])
@@ -49,12 +54,24 @@
             if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                 // Insert vehicle data into the database
                 $query = "INSERT INTO vehicle (added_by, location_id, company, model, year, passengers, description, category, price_per_day, image)
-                          VALUES ('$added_by', '$location_id', '$company', '$model', '$year', '$passengers', '$description', '$category', '$price_per_day', '$target_file')";
-                if (mysqli_query($connection, $query)) {
-                    echo "Vehicle added successfully.";
-                    //header("location: views/all_listings.php")
+                          VALUES (? , ? , ?, ?, ?, ?, ?, ?, ?, ?)";
+               
+                $stmt = mysqli_prepare($connection, $query);
+                
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "iisssissss", 
+                    $added_by, $location_id, $company, $model, $year, $passengers, $description, $category, $price_per_day, $target_file);
+                
+                    if (mysqli_stmt_execute($stmt)) {
+                        header("Location: views/all_listings.php");
+                        exit();
+                    } else {
+                        echo "Execute failed: " . mysqli_stmt_error($stmt);
+                    }
+                
+                    mysqli_stmt_close($stmt);
                 } else {
-                    echo "Error: " . mysqli_error($connection);
+                    echo "Prepare failed: " . mysqli_error($connection);
                 }
             } else {
                 echo "Error uploading image.";

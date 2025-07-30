@@ -3,7 +3,7 @@ require_once "../config/connection.php";
 session_start();
 
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== 1) {
-    header("Location: views/login-form.php");
+    header("Location: login-form.php");
     exit();
 }
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
@@ -49,7 +49,7 @@ $booking_list_query = "SELECT
     JOIN location l ON v.location_id = l.id
     JOIN users u ON b.user_id = u.id
     WHERE v.added_by = $user_id
-    ORDER BY b.start_date DESC";
+    ORDER BY b.start_date ASC";
 $booking_list_result = mysqli_query($connection, $booking_list_query);
 
 if (!$result) {
@@ -111,8 +111,6 @@ if (!$notification_result) {
         </div>   
        
         <div>
-          
-            <a href='add_vehicle_form.php'> Add New Vehicle</a>
       
             <a href='all_listings.php'>  View all listings </a>
             <a href='../logout.php' onclick="return confirm('Are you sure you want to logout?')"> Logout</a>
@@ -136,12 +134,26 @@ if (!$notification_result) {
         </div>
     </div>
     <?php endif; ?>
+    <?php 
+        $today = date('Y-m-d');
+        $upcoming = [];
+        $past = [];
+        while($row = mysqli_fetch_assoc($booking_list_result)){
+            if ($row['start_date'] >= $today && $row['status'] != 'Cancelled' ) {
+                $upcoming[] = $row;
+            } else {
+                $past[] = $row;
+            }
+        }
 
-    <h3 class="section-title">Booking History</h3><span>Click on the booking to view the details.</span>
-    <?php if (mysqli_num_rows($booking_list_result) > 0): ?>
+    ?>
+
+    <h3 class="section-title">Upcoming Bookings</h3>
+
+    <?php if (count($upcoming) > 0): ?>
     <div class="card-container">
-        <?php while ($row = mysqli_fetch_assoc($booking_list_result)): ?>
-        <div class="booking-card" onclick="window.location.href='booking_details.php?id=<?= $row['booking_id'] ?>'" style="cursor: pointer;">
+        <?php foreach($upcoming as $row): ?>
+        <div class="booking-card" onclick="window.location.href='host_booking_details.php?id=<?= $row['booking_id'] ?>'" style="cursor: pointer;">
          
             <h4><?= htmlspecialchars($row['company']) ?> <?= htmlspecialchars($row['model']) ?></h4>
             <div class="booking-info"><strong>Type:</strong> <?= htmlspecialchars($row['category']) ?></div>
@@ -168,16 +180,39 @@ if (!$notification_result) {
                     <span style="color: green;">Approved</span>
 
                 <?php elseif ($row['status'] == 'Cancelled'): ?>
-                    <span style="color: red;">Rejected</span>
+                    <span style="color: red;">Cancelled</span>
                 <?php endif; ?>
             </div>
         </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
     </div>
     <?php else: ?>
     <div class="no-data">
         <p>No bookings found.</p>
     </div>
     <?php endif; ?>
+    <h3 class="section-title">Past/Cancelled Bookings</h3>
+    <?php if (count($past) > 0): ?>
+        <div class="card-container">
+            <?php foreach ($past as $row): ?>
+            <div class="booking-card" onclick="window.location.href='host_booking_details.php?id=<?= $row['booking_id'] ?>'" style="cursor: pointer;">
+                <h4><?= htmlspecialchars($row['company']) ?> <?= htmlspecialchars($row['model']) ?></h4>
+                <div class="booking-info"><strong>Type:</strong> <?= htmlspecialchars($row['category']) ?></div>
+                <div class="booking-info"><strong>Price:</strong> $<?= htmlspecialchars($row['total_price']) ?></div>
+                <div class="booking-info"><strong>Rented By:</strong> <?= htmlspecialchars($row['user_name']) ?></div>
+                <div class="booking-info"><strong>Start:</strong> <?= htmlspecialchars($row['start_date']) ?></div>
+                <div class="booking-info"><strong>End:</strong> <?= htmlspecialchars($row['end_date']) ?></div>
+                <div class="booking-info"><strong>Pick up location: </strong><?= htmlspecialchars($row['address']) ?>, <?= htmlspecialchars($row['city']) ?>, BC</div>
+                <div class="booking-info"><strong>Status:</strong> <?= htmlspecialchars($row['status']) ?></div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <div class="no-data">
+            <p>No past bookings found.</p>
+        </div>
+    <?php endif; ?>
+
+    <?php include "../includes/footer.php";?>
 </body>
 </html>

@@ -6,8 +6,12 @@
         header("Location: login-form.php");
         exit();
     }
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Customer') {
+        echo "<h3>You aren't authorized to see the content of this page.</h3>";
+        exit();
+    }
     require_once 'config/connection.php';
-    echo "<h1>Welcome !</h1>";
+    
     $user_name = $_SESSION['user_name'] ?? 'Guest';
     
     // get vehicle name:
@@ -64,7 +68,7 @@
                 exit();
            
             }
-            header("Location: views/customer-dashboard.php");
+            header("Location: views/all_booking.php");
             exit();
         }
     

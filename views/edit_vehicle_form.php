@@ -4,6 +4,11 @@ session_start();
         header("Location: login-form.php");
         exit();
     }
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+        echo "<h3>You aren't authorized to see the content of this page.</h3>";
+        exit();
+    }
+    
     require_once '../config/connection.php';
     $vehicle_id = $_GET['id'] ?? null;
     if (!$vehicle_id) {
@@ -12,7 +17,7 @@ session_start();
     $query = "SELECT v.id
     , v.company, v.model, v.year, v.passengers, v.description, v.category, v.price_per_day, v.image, l.city, l.address
     , v.added_by, l.id AS location_id 
-FROM vehicle v JOIN location l ON v.location_id = l.id WHERE v.id = $vehicle_id";
+    FROM vehicle v JOIN location l ON v.location_id = l.id WHERE v.id = $vehicle_id";
     $result = mysqli_query($connection, $query);
     $vehicle = mysqli_fetch_assoc($result);
 
@@ -35,7 +40,7 @@ FROM vehicle v JOIN location l ON v.location_id = l.id WHERE v.id = $vehicle_id"
         <div>
             <a href='all_listings.php'>View All Listings</a>
             <a href='admin-dashboard.php'>Go back to dashboard</a>
-            <a href='../logout.php'>Logout</a>
+            <a href='../logout.php' onClick ="return confirm('Are you sure you want to logout?')">Logout</a>
         </div>
     </header>
     <form action="../edit_vehicle.php?id=<?php echo $vehicle_id ?>" method="post" enctype="multipart/form-data">
@@ -127,3 +132,6 @@ FROM vehicle v JOIN location l ON v.location_id = l.id WHERE v.id = $vehicle_id"
         <button type="submit">Edit Vehicle</button>
     
 </form>
+<?php include "../includes/footer.php";?>
+</body>
+</html>

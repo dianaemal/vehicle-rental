@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Adjust booked ranges for date picker
+    
      //to should be one day before the end date:
      bookedRanges.forEach(range => {
         const originalToDate = new Date(range.to);
@@ -46,28 +48,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
-    // Total price calculation:
-    const start = document.getElementById('start_date');
-        const end = document.getElementById('end_date');
-        const totalPrice = document.getElementById('total_price');
-        const totalPriceInput = document.getElementById("total_price_input");
 
+    // Price calculation functionality
+    const start = document.getElementById('start_date');
+    const end = document.getElementById('end_date');
+    const totalPrice = document.getElementById('total_price');
+    const totalPriceInput = document.getElementById('total_price_input');
+
+    function calculateTotal() {
+        const startDate = new Date(start.value);
+        const endDate = new Date(end.value);
         
-        function calculateTotal(){
-            const startDate = new Date(start.value);
-            const endDate = new Date(end.value);
-            if (startDate && endDate && endDate >= startDate){
-                //Note: Date returns the number of milliseconds since January 1, 1970, 00:00:00 UTC
-                const timeDiff = endDate - startDate;
-                const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1; // +1 to include the start day
-                const total = days * pricePerDay;
-                totalPrice.textContent = total.toFixed(2);
-                totalPriceInput.value = total.toFixed(2); // Update the hidden input field
-            }
-            else {
-                totalPrice.textContent = '0.00'; // Reset if dates are invalid
-            }
+        if (startDate && endDate && endDate >= startDate) {
+            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const total = days * pricePerDay;
+            console.log(total)
+            
+            totalPrice.textContent = total.toFixed(2);
+            totalPriceInput.value = total.toFixed(2);
+        } else {
+            totalPrice.textContent = '0.00';
+            totalPriceInput.value = '0.00';
         }
-        start.addEventListener('change', calculateTotal);
-        end.addEventListener('change', calculateTotal);
+    }
+
+
+    // Price calculation is now handled by flatpickr onChange events
+    start.addEventListener('change', calculateTotal);
+    end.addEventListener('change', calculateTotal);
+
+    // If editing, set end_date min/max on page load
+    // in order for editing to work, the current date should also be excluded in sql query so that nextStartdate can be found.
+    if (start.value) {
+        const selectedStartDate = new Date(start.value);
+
+        // Find the first booked range that starts AFTER the selected start date
+        const nextStartDate = bookedRanges.find(range => new Date(range.from) > selectedStartDate);
+        let maxDate = null;
+        if (nextStartDate) {
+            const nextDate = new Date(nextStartDate.from);
+            maxDate = nextDate.toISOString().split('T')[0];
+        }
+        const mindDate = new Date(selectedStartDate.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        endDatePicker.set('minDate', mindDate);
+        endDatePicker.set('maxDate', maxDate);
+    }
 });

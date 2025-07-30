@@ -25,6 +25,9 @@ input, select, button{
     border-radius: 4px;
     font-size: 16px;
 }
+select{
+    height: 40px;
+}
 h1{
     text-align: center;
     color: #356ae4;

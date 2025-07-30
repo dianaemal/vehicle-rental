@@ -22,7 +22,7 @@
 
     <input type="email" name="email" placeholder="Email" required>
    
-    <select name="role" required>
+    <select name="role" style="height: 50px;" required>
         <option value="" disabled selected>Select Role</option>
         <option value="Admin">Host</option>
         <option value="Customer">Customer</option>
@@ -37,6 +37,6 @@
 </form>
 </div>
 
-  
+<?php include "../includes/footer.php";?>
 </body>
 </html>

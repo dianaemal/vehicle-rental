@@ -1,14 +1,19 @@
 
-body {
+body  {
     margin: 0;
+    padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f5f6fa;
     color: #2f3640;
-    padding: 20px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  
+  
 }
 
 h2 {
     margin-bottom: 10px;
+
 }
 
 header {
@@ -61,6 +66,7 @@ header a:hover {
 }
 
 .card-container {
+
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
